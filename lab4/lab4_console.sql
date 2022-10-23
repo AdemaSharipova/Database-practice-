@@ -28,13 +28,12 @@ where tot_cred > 45
 --Find all students whose names end with vowels;
 select *
 from student
-where name like '%vowels';
---to check
-insert into student (id, name, dept_name, tot_cred)
-VALUES (35, 'Somethingvowels', 'Physics', 47);
-delete
-from student
-where id = '35';
+where right(name, 1) = 'a'
+   or right(name, 1) = 'o'
+   or right(name, 1) = 'e'
+   or right(name, 1) = 'i'
+   or right(name, 1) = 'y'
+   or right(name, 1) = 'u';
 
 --Find all courses which have course ‘CS-101’ as their prerequisite;
 select *
