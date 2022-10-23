@@ -1,31 +1,32 @@
---Find all courses worth more than 3 credits;
+--#1
+--a)Find all courses worth more than 3 credits;
 select *
 from course
 where credits > 3;
 
---Find all classrooms situated either in ‘Watson’ or ‘Packard’ buildings;
+--b)Find all classrooms situated either in ‘Watson’ or ‘Packard’ buildings;
 select *
 from classroom
 where building = 'Watson'
    or building = 'Packard';
 
---Find all courses offered by the Computer Science department;
+--c)Find all courses offered by the Computer Science department;
 select *
 from course
 WHERE dept_name = 'Comp. Sci.';
 
---Find all courses offered during fall;
+--d)Find all courses offered during fall;
 select *
 from course
 where course_id in (select course_id from section where semester = 'Fall');
 
---Find all students who have more than 45 credits but less than 90;
+--e)Find all students who have more than 45 credits but less than 90;
 select *
 from student
 where tot_cred > 45
   and tot_cred < 90;
 
---Find all students whose names end with vowels;
+--f)Find all students whose names end with vowels;
 select *
 from student
 where right(name, 1) = 'a'
@@ -35,12 +36,21 @@ where right(name, 1) = 'a'
    or right(name, 1) = 'y'
    or right(name, 1) = 'u';
 
---Find all courses which have course ‘CS-101’ as their prerequisite;
+select *
+from student
+where name = '%a'
+   or name = '%0'
+   or name = '%e'
+   or name = '%i'
+   or name = '%y'
+   or name = '%u';
+
+--g)Find all courses which have course ‘CS-101’ as their prerequisite;
 select *
 from course
 where course_id in (select course_id from prereq where prereq_id = 'CS-101');
 
---#2
+----------------------------#2--------------------------------------------
 /*For each department, find the average salary of instructors in that
  department and list them in ascending order. Assume that every
  department has at least one instructor */
@@ -60,7 +70,7 @@ from department
 where dept_name in (select dept_name
                     from course
                     group by dept_name
-                    having count(*) in (select count(*) from course group by dept_name order by count(*) limit 1));
+                    having count(*) in (select count(*) from course group by dept_name order by count(*) nulls last limit 1));
 
 
 --Find the ID and name of each student who has taken more than 3 courses
@@ -113,7 +123,7 @@ order by name;
 select *
 from instructor
 where id in
-      (select distinct i_id
+      (select i_id
        from advisor
        where s_id in (select id from takes where grade != 'A' and grade != 'A-' and grade != 'B+' and grade != 'B'));
 
@@ -143,19 +153,22 @@ where dept_name in (select dept_name
                     except
                     select dept_name
                     from student
-                    where id in (select id from takes where grade = 'A' except select id from takes where grade != 'A'));
+                    where id in
+                          (select id from takes where grade = 'A' except select id from takes where grade != 'A'));
 
 --Find all courses offered in the morning hours (i.e., courses ending before 13:00);
 
-select * from course where course_id in (
-select course_id
-from section
-where time_slot_id in
-      (select time_slot_id from time_slot where (end_hr <= 12 and end_min <= 59))
-except (select course_id
-from section
-where time_slot_id in
-      (select time_slot_id from time_slot where (end_hr >= 12))));
+select *
+from course
+where course_id in (select course_id
+                    from section
+                    where time_slot_id in
+                          (select time_slot_id from time_slot where (end_hr <= 12 and end_min <= 59))
+                    except
+                    (select course_id
+                     from section
+                     where time_slot_id in
+                           (select time_slot_id from time_slot where (end_hr > 12))));
 
 
 
