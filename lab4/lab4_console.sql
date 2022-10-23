@@ -1,4 +1,4 @@
---#1
+------------#1
 --a)Find all courses worth more than 3 credits;
 select *
 from course
