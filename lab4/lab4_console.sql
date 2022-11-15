@@ -1,3 +1,15 @@
+create table example (
+    id int ,
+    name varchar,
+    salary int
+);
+insert into example (id, name, salary) VALUES (1,'adem', 50000);
+insert into example (id, name, salary) VALUES (1,'Arnur', 50003);
+insert into example (id, name, salary) VALUES (1,'Arnur', 100003);
+select * from example;
+select * from example order by salary desc limit 1 offset 2;
+select *from example where name like '%a%';
+drop table example;
 ------------#1
 --a)Find all courses worth more than 3 credits;
 select *
