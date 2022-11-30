@@ -52,18 +52,20 @@ VALUES ('New York', 3);
 --10)Create a new box, with code "H5RT", containing "Papers"
 --with a value of $200, and located in warehouse 2.
 insert into boxes (code, contents, value, warehouses)
-VALUES ('H5RT', 'Papers', 200, 2);
+values ('H5RT', 'Papers', 200, 2);
 
+drop table boxes;
 --11)Reduce the value of the third largest box by 15%.
 update boxes
 set value = value - (value * 0.15)
 where value =
-      (select value from boxes order by value desc nulls last limit 1 offset 2);
+      (select distinct on (value) from boxes order by value desc nulls last limit 1 offset 2);
 
 --12)Remove all boxes with a value lower than $150.
 delete
 from boxes
 where value < 150;
+
 select *
 from boxes;
 
