@@ -67,18 +67,22 @@ from isPasswordValid('213ujkdfdjsk!!');
 
 -- e)Returns two outputs, but has one input.
 
-create or replace function two_outputs_one_input(inout value1 integer, out value2 integer)
+create or replace function two_outputs_one_input(inout password varchar, out isValid varchar)
 as
 $$
 begin
-    value2 := value1 + 1;
-
-end;
+    if isPasswordValid(password) = true then
+        isValid = 'valid';
+    else
+        isValid = 'not valid';
+    end if;
+    raise notice '% password is %', password, isValid;
+end
 $$
     language plpgsql;
 
 select *
-from two_outputs_one_input(3);
+from two_outputs_one_input('sfsdkfsdfs4324!');
 
 
 -- #2 create a triger:
@@ -212,8 +216,98 @@ execute procedure stop_deletion();
 
 drop trigger stop_deletion_trigger on item;
 
-delete from item where id = 2;
-select * from item;
+delete
+from item
+where id = 2;
+select *
+from item;
 
 -- d) Launches functions 1.d and 1.e.
+
+create table user_table
+(
+    id       serial primary key,
+    username varchar,
+    password varchar
+);
+
+
+create trigger oneD_oneE_trigger
+    before insert
+    on user_table
+    for each row
+execute procedure oneD_oneE();
+
+create or replace function oneD_oneE()
+    returns trigger
+    language plpgsql
+as
+$$
+begin
+    perform isPasswordValid(new.password);
+    perform two_outputs_one_input(new.password);
+    return new;
+end
+$$;
+
+insert into user_table (username, password)
+VALUES ('Username', 'sfjkdjfks');
+select *
+from user_table;
+
+-- #3 create procedures:
+-- a) Increases salary by 10% for every 2 years of work experience and provides
+-- 10% discount and after 5 years adds 1% to the discount.
+
+create or replace procedure increases_salary_discount()
+    language plpgsql
+as
+$$
+begin
+    update worker
+    set salary = salary + (salary * (work_experience / 2 * 0.1));
+    update worker
+    set discount = 10 + (work_experience / 5 * 0.1);
+end;
+$$;
+
+select *
+from worker;
+
+call increases_salary_discount();
+
+insert into worker (name, date_of_birth, age, salary, work_experience)
+VALUES ('name6', '2003-12-12', 18, 100000, 3);
+
+-- b) After reaching 40 years, increase salary by 15%. If work experience is more
+-- than 8 years, increase salary for 15% of the already increased value for work
+-- experience and provide a constant 20% discount.
+
+create or replace procedure a_lot_changes()
+    language plpgsql
+as
+$$
+begin
+    update worker
+    set salary = salary * 1.15
+    where age >= 40;
+
+    update worker
+    set salary = salary * 1.15, discount = 20
+    where work_experience > 8;
+end;
+$$;
+
+select * from worker;
+
+insert into worker (name, date_of_birth, age, salary, work_experience)
+VALUES ('name', '2003-12-12', 18, 100000, 9);
+
+insert into worker (name, date_of_birth, salary, work_experience)
+VALUES ('name', '1950-12-12', 100000, 9);
+
+delete from worker where id = 11;
+
+call a_lot_changes();
+
 
